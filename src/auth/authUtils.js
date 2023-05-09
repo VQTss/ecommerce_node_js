@@ -53,7 +53,6 @@ const authenticationV2 = asynHandler(async (req,res,next) => {
         throw new NotFoundError("Not found keyStore");
     }
     // 3
-
     if (req.headers[HEADER.REFRESHTOKEN]) {
         try {
             const refreshToken = req.headers[HEADER.REFRESHTOKEN];
@@ -69,7 +68,20 @@ const authenticationV2 = asynHandler(async (req,res,next) => {
             throw error
         }
     }
-   
+    const accessToken = req.headers[HEADER.AUTHORIZATION];
+    if (!accessToken) {
+        throw new AuthFailureError("Invalid request");
+    }
+    try {
+        const deocodeUser = JWT.verify(accessToken, keyStore.publicKey);
+        if (userID !== deocodeUser.userID) {
+            throw new AuthFailureError("Invalid request");
+        }
+        req.keyStore = keyStore;
+        return next();
+    } catch (error) {
+        throw error
+    }
 })
 
 

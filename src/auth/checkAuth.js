@@ -29,8 +29,6 @@ const permission = (permission) => {
         if (!req.objKey.permissions) {
             throw new BadRequestError("Error:  Permission denied!!");
         }
-
-        console.log("Permissions::", req.objKey.permissions);
         const vaidPermisstions = req.objKey.permissions.includes(permission);
         if (!vaidPermisstions) {
             throw new BadRequestError('Error:  Permission!!');
