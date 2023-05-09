@@ -6,7 +6,8 @@ const { findByUserID } = require('../services/keyToken.services');
 const HEADER = {
     API_KEY: 'x-api-key',
     CLIENT_ID: 'x-client-id',
-    AUTHORIZATION: 'authorization'
+    AUTHORIZATION: 'authorization',
+    REFRESHTOKEN : 'x-rtoken-id'
 }
 
 
@@ -33,6 +34,44 @@ const  creatTokenPair =  async (payload, publicKey, privateKey) => {
 
         return {accessToken, refreshToken};
 }
+
+const authenticationV2 = asynHandler(async (req,res,next) => {
+    /*
+     * 1- check userID missing
+     * 2- get accessToken
+     * 3- verify Token
+     * 4- check user in dbs
+     * 5- check keyStore with userID
+     * 6- OK all => return next
+     */
+    const userID = req.headers[HEADER.CLIENT_ID];
+    if (!userID) {
+        throw new  AuthFailureError('Invalid request');
+    }
+    const keyStore = await findByUserID(userID);
+    if (!keyStore) {
+        throw new NotFoundError("Not found keyStore");
+    }
+    // 3
+
+    if (req.headers[HEADER.REFRESHTOKEN]) {
+        try {
+            const refreshToken = req.headers[HEADER.REFRESHTOKEN];
+            const deocodeUser = JWT.verify(refreshToken, keyStore.privateKey);
+            if (userID !== deocodeUser.userID) {
+                throw new AuthFailureError("Invalid request");
+            }
+            req.keyStore = keyStore;
+            req.user = deocodeUser;
+            req.refreshToken = refreshToken;
+            return next();
+        } catch (error) {
+            throw error
+        }
+    }
+   
+})
+
 
 
 const authentication = asynHandler(async (req,res,next) => {
@@ -69,8 +108,15 @@ const authentication = asynHandler(async (req,res,next) => {
     }
 })
 
+const verifyJWT = async (token, keySecret) => {
+    return await JWT.verify(token,keySecret);
+}
+
+
 module.exports = {
     creatTokenPair, 
-    authentication 
+    authentication ,
+    verifyJWT,
+    authenticationV2
 }
 

@@ -4,9 +4,9 @@ const bcrypt = require('bcrypt');
 const shopModel = require('../models/shop.model')
 const crypto = require('node:crypto');
 const keyTokenService = require('../services/keyToken.services');
-const { creatTokenPair } = require('../auth/authUtils');
+const { creatTokenPair, verifyJWT } = require('../auth/authUtils');
 const { getInforData } = require('../utils');
-const { BadRequestError, AuthFailureError } = require('../core/error.response');
+const { BadRequestError, AuthFailureError, ForbiddenError } = require('../core/error.response');
 const { findByEmail } = require('./shop.services');
 const KeyTokenService = require('../services/keyToken.services');
 
@@ -21,17 +21,80 @@ const RoleShop = {
 
 class AccessService {
 
-    /**
-     * 1- check this token used?
-     * 
-     *  
-     */
+
+
+    static handlerRefreshTokenV2 = async ({keyStore, user,refreshToken}) => {
+        const {userID , email} = user;
+        if (keyStore.refreshTokensUsed.includes(refreshToken)) {
+            await KeyTokenService.deleteKeyByID(userID);
+            throw new ForbiddenError("Something wrong happend!! Pls relogin");
+        }
+        if (keyStore.refreshToken !== refreshToken) {
+            throw new AuthFailureError("Shop not registered");
+        }
+        const foundShop = await findByEmail({email});
+        if (!foundShop) {
+            throw new AuthFailureError("Shop not registered");
+        }
+        // create 1 cap moi
+
+        const tokens = await creatTokenPair({ userID, email }, keyStore.publicKey, keyStore.privateKey);
+        // update
+        await keyStore.updateOne({
+            $set: {
+                refreshToken :  tokens.refreshToken,
+            },
+            $addToSet : {
+                // da duoc su dung de lay token moi
+                refreshTokensUsed : refreshToken
+            }
+        })
+        return {
+            user,
+            tokens
+        }
+    }
+   
 
     static handlerRefreshToken = async (refreshToken) => {
+        // Kiem tra token da duoc su dung chua
         const foundToken = await KeyTokenService.findByRefreshTokenUsed(refreshToken);
+        // Neu co
         if (foundToken) {
-            // decode
-            
+            // decode xem ai dang truy
+            const {userID, email} = await verifyJWT(refreshToken,foundToken.privateKey);
+            console.log({userID,email});
+            // remove all token in keyStore
+            await KeyTokenService.deleteKeyByID(userID);
+            throw new ForbiddenError("Something wrong happend!! Pls relogin");
+        }
+
+        const holderToken = await KeyTokenService.findByRefreshToken(refreshToken);
+        if (!holderToken) {
+            throw new AuthFailureError("Shop not registered [1]");
+        }
+        // verify token
+        const {userID, email} = await verifyJWT(refreshToken,holderToken.privateKey);
+        // check userID
+        const foundShop = await findByEmail({email});
+        if (!foundShop) {
+            throw new AuthFailureError("Shop not registered [2]");
+        }
+        // create 1 cap moi
+        const tokens = await creatTokenPair({ userID, email }, holderToken.publicKey, holderToken.privateKey);
+        // update
+        await holderToken.updateOne({
+            $set: {
+                refreshToken :  tokens.refreshToken,
+            },
+            $addToSet : {
+                // da duoc su dung de lay token moi
+                refreshTokensUsed : refreshToken
+            }
+        })
+        return {
+            user : {userID, email},
+            tokens
         }
     }
 

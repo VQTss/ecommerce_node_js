@@ -28,7 +28,7 @@ app.use(compression()); // nén dữ liệu trước khi gửi về client
 
 // init routes
 
-app.use('',require('./routers'))
+app.use(require('./routers'));
 
 // init database
 require('./dbs/init.mogodb');
@@ -49,6 +49,7 @@ app.use((error,req,res,next) => {
     return res.status(statusCode).json({
         status : 'error',
         code : statusCode,
+        stack: error.stack,
         message : error.message || 'Internal error server'
     })
 })

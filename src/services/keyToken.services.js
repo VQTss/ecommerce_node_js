@@ -29,17 +29,24 @@ class KeyTokenService {
     }
     
     static findByUserID = async ( userID ) => {
-        const found = await keyTokenModel.findOne({user: userID}).lean();
+        const found = await keyTokenModel.findOne({user: userID});
         return found;
     }
 
     static removeKeyByID = async (id) =>{
-        const remove  =  await keyTokenModel.deleteMany({_id: id});
+        const remove  =  await keyTokenModel.deleteMany({_id: id}).lean();
         return remove;
     }
 
     static findByRefreshTokenUsed = async ( refreshToken ) => {
-        return await keyTokenModel.findOne({refreshTokensUsed: refreshToken})
+        return await keyTokenModel.findOne({refreshTokensUsed: refreshToken}).lean();
+    }
+
+    static findByRefreshToken = async ( refreshToken ) => {
+        return await keyTokenModel.findOne({refreshToken});
+    }
+    static deleteKeyByID = async ( userID) => {
+        return keyTokenModel.deleteOne({ user: userID });
     }
 
 }
