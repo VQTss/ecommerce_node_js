@@ -12,7 +12,7 @@ router.use(permission('0000'))
 
 router.use('/v1/api',userRouter);
 
-console.log("------ Start Product---------");
+
 router.use('/v1/api/product',productRouter);
 
 module.exports = router;

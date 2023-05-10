@@ -78,6 +78,7 @@ const authenticationV2 = asynHandler(async (req,res,next) => {
             throw new AuthFailureError("Invalid request");
         }
         req.keyStore = keyStore;
+        req.user = deocodeUser;
         return next();
     } catch (error) {
         throw error

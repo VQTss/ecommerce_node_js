@@ -8,11 +8,12 @@ class ProductControllers {
     createProduct = async(req, res, next) => {
         const type  = req.body.product_type;
         const payload = req.body;
-        console.log(`type:::`,type);
-        console.log(`payload:::`,payload);
         new SuccessResponse ( {
             message: "create product success!",
-            metadata : await productService.createProduct(type,payload),
+            metadata : await productService.createProduct(type,{
+                ...req.body,
+                product_shop: req.user.userID
+            }),
         }).send(res)
     }
    

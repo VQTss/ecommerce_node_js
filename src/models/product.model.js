@@ -28,7 +28,7 @@ const productSchema = new Schema({
     product_type : {
         type: String,
         required : true,
-        enum : ['Electronics', 'Clothing', 'Furniture'],
+        enum : ['Electronic', 'Clothing', 'Furniture'],
 
     },
     product_shop : {
@@ -57,7 +57,11 @@ const clothingSchema = new Schema({
     },
     material : {
         type: String,
-    }
+    },
+    product_shop : {
+        type: Schema.Types.ObjectId , 
+        ref: "Shop"
+    },
 }, {
     collection: 'clothes',
     timestamps: true
@@ -73,7 +77,11 @@ const electronicSchema =  new Schema({
     },
     color : {
         type: String,
-    }
+    },
+    product_shop : {
+        type: Schema.Types.ObjectId , 
+        ref: "Shop"
+    },
 },{
     collection : 'Electronic',
     timestamps: true

@@ -11,7 +11,7 @@ const { authenticationV2 } = require('../../auth/authUtils');
 // AUTHENTICATION
 router.use(authenticationV2);
 ////////////////////////////////////////
-console.log("------------------Product---------------");
+
 router.post('', asynHandler(productControllers.createProduct));
 
 
