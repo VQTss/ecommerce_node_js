@@ -34,7 +34,6 @@ const shopSchema = new Schema({
         type : Array,
         default : []
     }
-
 }, {
     timestamps  : true,
     collection : COLLECTION_NAME

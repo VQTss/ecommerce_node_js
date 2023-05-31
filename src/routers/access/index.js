@@ -12,8 +12,8 @@ const { authentication , authenticationV2 } = require('../../auth/authUtils');
 
 router.post('/shop/signup',asynHandler(accessControllers.signUp));
 router.post('/shop/login', asynHandler(accessControllers.login))
-////////////////////////////////////////
-// AUTHENTICATION
+/////////////// ----- AUTHENTICATION ----- ////////////////////////
+// 
 router.use(authenticationV2);
 ////////////////////////////////////////
 router.post('/shop/logout', asynHandler(accessControllers.logout));

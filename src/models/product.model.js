@@ -17,6 +17,9 @@ const productSchema = new Schema({
     product_description : {
         type : String
     },
+    product_slug : {
+        type : String
+    },
     product_price : {
         type: Number,
         required : true,
@@ -38,6 +41,30 @@ const productSchema = new Schema({
     product_attribute : {
         type : Schema.Types.Mixed , 
         required  : true
+    },
+    // more
+    product_ratingAverage : {
+        type: Number,
+        default: 4.5,
+        min: [1,'Rating must be above 1.0'],
+        max: [5,'Rating must be above 5.0'],
+        set: (val) => Math.round(val*10) / 10,
+    },
+    product_variations: {
+        type: Array,
+        default: []
+    },
+    isDraft : {
+        type: Boolean,
+        default: true,
+        index : true,
+        select : false, // find
+    },
+    isPublish : {
+        type: Boolean,
+        default: false,
+        index : true,
+        select : false, // find
     }
 }, {
     collection: COLLECTION_NAME,
@@ -88,8 +115,30 @@ const electronicSchema =  new Schema({
 })
 
 
+const furnitureSchema =  new Schema({
+    brand : {
+        type: String,
+        required : true,
+    },
+    size : {
+        type: String,
+    },
+    material : {
+        type: String,
+    },
+    product_shop : {
+        type: Schema.Types.ObjectId , 
+        ref: "Shop"
+    },
+},{
+    collection : 'Funiture',
+    timestamps: true
+})
+
+
 module.exports = {
     product : model(DOCUMENT_NAME, productSchema),
     electronic : model('Electronic', electronicSchema),
-    clothing : model('Clothing', clothingSchema)
+    clothing : model('Clothing', clothingSchema),
+    furniture: model('Furniture',furnitureSchema)
 }

@@ -1,11 +1,7 @@
 const { BadRequestError, ConflictRequestError } = require("../core/error.response");
 const { findByID } = require("../services/apiKey.services");
 
-const HEADER = {
-    API_KEY: 'x-api-key',
-    AUTHORIZATION: 'authorization'
-}
-
+const {HEADER} = require('../config/constants/index');
 
 
 const apiKey = async (req, res, next) => {

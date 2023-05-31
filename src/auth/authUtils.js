@@ -3,12 +3,7 @@ const asynHandler = require('../helpers/asyncHandler');
 const { AuthFailureError, NotFoundError } = require('../core/error.response');
 const { findByUserID } = require('../services/keyToken.services');
 
-const HEADER = {
-    API_KEY: 'x-api-key',
-    CLIENT_ID: 'x-client-id',
-    AUTHORIZATION: 'authorization',
-    REFRESHTOKEN : 'x-rtoken-id'
-}
+const {HEADER} = require('../config/constants/index');
 
 
 const  creatTokenPair =  async (payload, publicKey, privateKey) => {
