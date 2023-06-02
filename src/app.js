@@ -26,6 +26,10 @@ app.use(helmet()); // bảo mật
 app.use(compression()); // nén dữ liệu trước khi gửi về client
 
 
+
+
+
+
 // init routes
 
 app.use(require('./routers'));

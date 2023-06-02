@@ -31,7 +31,7 @@ const productSchema = new Schema({
     product_type : {
         type: String,
         required : true,
-        enum : ['Electronic', 'Clothing', 'Furniture'],
+        enum : ['Electronic', 'Clothing', 'Funiture'],
 
     },
     product_shop : {

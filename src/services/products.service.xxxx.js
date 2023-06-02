@@ -1,21 +1,22 @@
-const  {product , clothing , electronic} =  require('../models/product.model');
+const  {product , clothing , electronic , furniture} =  require('../models/product.model');
 const {BadRequestError} = require('../core/error.response');
-
 // define Factory class to create product
 
 class ProductFactory {
+
+    static productRegistry = {}; // key - class
+    static registerProductType (type , classRef) {
+        ProductFactory.productRegistry[type] = classRef;
+    }
+
     static async createProduct(type, payload) {
-        switch (type) {
-            case 'Electronic':
-                return new Electronic(payload).createProduct();
-            case 'Clothing':
-                return new Clothing(payload).createProduct();    
-            default:
-                throw new BadRequestError(`Invalid Product Types ${type}`);
-        }
+       const producClass = ProductFactory.productRegistry[type];
+       if (!producClass) {
+        throw new BadRequestError(`Invalid product type ${type}`); 
+       }
+       return new producClass(payload).createProduct();
     }
 }
-
 
 // define base product class
 
@@ -56,8 +57,6 @@ class Clothing extends  Product{
 
 class Electronic extends  Product{
 
-    
-
      async createProduct (){
         const newElectronic = await electronic.create({
             ...this.product_attribute,
@@ -74,6 +73,31 @@ class Electronic extends  Product{
         return newProduct;
     }
 }
+
+
+class Funiture extends  Product{
+
+    async createProduct (){
+       const newFuniture = await furniture.create({
+           ...this.product_attribute,
+           product_shop:  this.product_shop
+       });
+     
+       if (!newFuniture) {
+           throw new BadRequestError('create new Electronic error');
+       }
+       const newProduct = await super.createProduct(newFuniture._id);
+       if(!newProduct){
+           throw new BadRequestError('create new Product error');
+       }
+       return newProduct;
+   }
+}
+
+ProductFactory.registerProductType('Electronic', Electronic);
+ProductFactory.registerProductType('Clothing', Clothing);
+ProductFactory.registerProductType('Funiture', Funiture);
+
 
 
 module.exports = ProductFactory;
